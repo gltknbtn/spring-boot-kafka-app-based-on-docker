@@ -1,0 +1,7 @@
+FROM mysql:5.7
+VOLUME gltknbtn-kafka-database-volume-mysql:/var/lib/mysql
+EXPOSE 3306:3306
+ENV MYSQL_ROOT_PASSWORD=3113327
+ENV MYSQL_USER="gltknbtn"
+ENV MYSQL_PASSWORD=3113327
+ENV MYSQL_DATABASE="test"

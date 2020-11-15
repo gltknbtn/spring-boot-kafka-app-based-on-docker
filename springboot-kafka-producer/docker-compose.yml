@@ -1,0 +1,32 @@
+version: '3.7'
+# Removed subprocess.CalledProcessError: Command '['/usr/local/bin/docker-credential-desktop', 'get']' returned non-zero exit status 1
+# I had this:
+# cat ~/.docker/config.json
+# {"auths":{},"credsStore":"", "credsStore":"desktop","stackOrchestrator":"swarm"}
+# I updated to this:
+# {"auths":{},"credsStore":"","stackOrchestrator":"swarm"}
+services:
+  kafka-producer-springbootapp:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    image: gltknbtn/springboot-kafka-producer:SNAPSHOT-1.0.0
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      MYSQL_HOSTNAME: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DB_NAME: test
+      MYSQL_USERNAME: gltknbtn
+      MYSQL_PASSWORD: 3113327
+      KAFKA_BROKER_HOSTNAME: kafka1
+      KAFKA_BROKER_PORT: 9092
+    networks:
+      - gltknbtn-kafka-web-application-network
+# Volumes
+volumes:
+  gltknbtn-kafka-database-producer-volume:
+
+networks:
+  gltknbtn-kafka-web-application-network:

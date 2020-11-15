@@ -1,0 +1,77 @@
+SOLR_HOSTNAME: solr
+spring:
+  profiles:
+    active: local
+server:
+  port: 8081
+---
+spring:
+  profiles: local
+  data:
+    mongodb:
+      database: gltknbtn
+      uri: mongodb://mongo
+  kafka:
+    template:
+      default-topic: log-inout-events
+    consumer:
+      bootstrap-servers: kafka1:9092
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+    producer:
+      bootstrap-servers:
+        - kafka1:9092
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+---
+spring:
+  profiles: nonprod
+  kafka:
+    template:
+      default-topic: log-inout-events
+    consumer:
+      bootstrap-servers: localhost:9095,localhost:9096,localhost:9097
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+      ssl:
+        trust-store-location: file:/D:/MyMind/personel/Improvments/Sample Apps/Apache Kafka/dev/ssl/client.truststore.jks
+        trust-store-password: 3113327
+        key-store-location: file:/D:/MyMind/personel/Improvments/Sample Apps/Apache Kafka/dev/ssl/client.keystore.jks
+        key-store-password: 3113327
+    producer:
+      bootstrap-servers:
+        - localhost:9091,localhost:9096,localhost:9097
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security:
+        protocol: SSL
+      ssl.endpoint.identification.algorithm:
+---
+spring:
+  profiles: prod
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+        transaction:
+          interceptor: TRACE
+

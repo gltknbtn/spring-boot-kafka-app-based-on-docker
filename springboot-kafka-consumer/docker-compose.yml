@@ -1,0 +1,171 @@
+version: '3.7'
+# Removed subprocess.CalledProcessError: Command '['/usr/local/bin/docker-credential-desktop', 'get']' returned non-zero exit status 1
+# I had this:
+# cat ~/.docker/config.json
+# {"auths":{},"credsStore":"", "credsStore":"desktop","stackOrchestrator":"swarm"}
+# I updated to this:
+# {"auths":{},"credsStore":"","stackOrchestrator":"swarm"}
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  kafka1:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+      - '9093:9093'
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+    networks:
+      - gltknbtn-kafka-web-application-network
+    depends_on:
+      - zookeeper
+
+# NOT WORKED.. MULTIPLE BROKER SETUP WILL BE RESEARCHED...
+#  kafka2:
+#    image: 'bitnami/kafka:latest'
+#    ports:
+#      - '9094:9094'
+#      - '9095:9095'
+#    environment:
+#      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+#      - ALLOW_PLAINTEXT_LISTENER=yes
+#      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+#      - KAFKA_CFG_LISTENERS=CLIENT://:9094,EXTERNAL://:9095
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:9094,EXTERNAL://localhost:9095
+#      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+#    networks:
+#      - gltknbtn-kafka-web-application-network
+#    depends_on:
+#      - zookeeper
+#      - kafka1
+#
+#  kafka3:
+#    image: 'bitnami/kafka:latest'
+#    ports:
+#      - '9096:9096'
+#      - '9097:9097'
+#    environment:
+#      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+#      - ALLOW_PLAINTEXT_LISTENER=yes
+#      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+#      - KAFKA_CFG_LISTENERS=CLIENT://:9096,EXTERNAL://:9097
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka1:9096,EXTERNAL://localhost:9097
+#      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+#    networks:
+#      - gltknbtn-kafka-web-application-network
+#    depends_on:
+#      - zookeeper
+#      - kafka2
+
+
+  kafka-consumer-springbootapp:
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    image: gltknbtn/springboot-kafka-consumer:SNAPSHOT-1.0.0
+    ports:
+      - "8081:8081"
+    restart: always
+    depends_on: # Start the depends_on first
+      - mysql
+      - mongo
+      - solr
+      - zookeeper
+      - kafka1
+#      - kafka2
+#      - kafka3
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  kafka-producer-springbootapp:
+    #    build:
+    #      context: .
+    #      dockerfile: Dockerfile
+    image: gltknbtn/springboot-kafka-producer:SNAPSHOT-1.0.0
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      MYSQL_HOSTNAME: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DB_NAME: test
+      MYSQL_USERNAME: gltknbtn
+      MYSQL_PASSWORD: 3113327
+      KAFKA_BROKER_HOSTNAME: kafka1
+      KAFKA_BROKER_PORT: 9092
+    depends_on: # Start the depends_on first
+      - mysql
+      - mongo
+      - solr
+      - zookeeper
+      - kafka1
+      - kafka-consumer-springbootapp
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  mysql:
+    build:
+      context: mysql-docker
+      dockerfile: mysql-docker/Dockerfile
+    image: gltknbtn/springboot-kafka-mysqldb:SNAPSHOT-1.0.0
+    ports:
+      - "3306:3306"
+    restart: always
+    volumes:
+      - gltknbtn-kafka-database-volume-mysql:/var/lib/mysql
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  mongo:
+    build:
+      context: mongo-docker
+      dockerfile: mongo-docker/Dockerfile
+    image: gltknbtn/springboot-kafka-mongodb:SNAPSHOT-1.0.0
+    ports:
+      - "27017:27017"
+    restart: always
+    volumes:
+      - gltknbtn-kafka-database-volume-mongo:/var/lib/mongo
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  solr:
+    build:
+      context: solr-docker
+      dockerfile: solr-docker/Dockerfile
+    image: gltknbtn/springboot-kafka-solrdb:SNAPSHOT-1.0.0
+    ports:
+      - "8983:8983"
+    environment:
+      SOLR_HOST: solr
+    entrypoint:
+      - bash
+      - "-c"
+      - "precreate-core gettingstarted; precreate-core InputOutputLog; exec solr -f"
+    restart: always
+    volumes:
+      - gltknbtn-kafka-database-volume-solr:/var/lib/solr
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+# Volumes
+volumes:
+  gltknbtn-kafka-database-volume-mysql:
+  gltknbtn-kafka-database-volume-mongo:
+  gltknbtn-kafka-database-volume-solr:
+
+networks:
+  
+  gltknbtn-kafka-web-application-network:
