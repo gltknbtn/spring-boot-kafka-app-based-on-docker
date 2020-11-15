@@ -78,6 +78,11 @@ services:
     ports:
       - "8081:8081"
     restart: always
+    environment:
+      SOLR_HOSTNAME: solr
+      MONGO_HOSTNAME: mongo
+      KAFKA_BROKER_HOSTNAME: kafka1
+      KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
       - mysql
       - mongo

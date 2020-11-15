@@ -1,4 +1,4 @@
-SOLR_HOSTNAME: solr
+SOLR_HOSTNAME: ${SOLR_HOSTNAME:localhost}
 spring:
   profiles:
     active: local
@@ -10,18 +10,18 @@ spring:
   data:
     mongodb:
       database: gltknbtn
-      uri: mongodb://mongo
+      uri: mongodb://${MONGO_HOSTNAME:localhost}
   kafka:
     template:
       default-topic: log-inout-events
     consumer:
-      bootstrap-servers: kafka1:9092
+      bootstrap-servers: ${KAFKA_BROKER_HOSTNAME:localhost}:${KAFKA_BROKER_PORT:9092}
       key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: log-inout-events-listener-group
     producer:
       bootstrap-servers:
-        - kafka1:9092
+        - ${KAFKA_BROKER_HOSTNAME:localhost}:${KAFKA_BROKER_PORT:9092}
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 ---

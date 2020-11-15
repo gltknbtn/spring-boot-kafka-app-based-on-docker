@@ -22,7 +22,7 @@ public class SolrConfig {
 
     @Bean
     public SolrClient solrClient() {
-        SolrClient solrClient = new HttpSolrClient.Builder("http://"+env.getProperty("SOLR_HOSTNAME") != null ? env.getProperty("SOLR_HOSTNAME") : "localhost" +":8983/solr").build();
+        SolrClient solrClient = new HttpSolrClient.Builder("http://" +env.getProperty("SOLR_HOSTNAME") +":8983/solr").build();
         return solrClient;
     }
 
