@@ -2,8 +2,15 @@ SOLR_HOSTNAME: ${SOLR_HOSTNAME:localhost}
 spring:
   profiles:
     active: local
+  application:
+    name: springboot-kafka-consumer
 server:
   port: 8081
+eureka:
+  client:
+    service-url:
+      #defaultZone: http://localhost:8761/eureka
+      defaultZone: http://naming-server:8761/eureka/
 ---
 spring:
   profiles: local

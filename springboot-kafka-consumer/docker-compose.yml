@@ -6,12 +6,22 @@ version: '3.7'
 # I updated to this:
 # {"auths":{},"credsStore":"","stackOrchestrator":"swarm"}
 services:
+  naming-server:
+    image: gltknbtn/netflix-eureka-naming-server:1.1.0-SNAPSHOT
+    ports:
+      - "8761:8761"
+    restart: always
+    networks:
+      - gltknbtn-kafka-web-application-network
+
   zookeeper:
     image: 'bitnami/zookeeper:latest'
     ports:
       - '2181:2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    depends_on:
+      - naming-server
     networks:
       - gltknbtn-kafka-web-application-network
 
@@ -30,6 +40,7 @@ services:
     networks:
       - gltknbtn-kafka-web-application-network
     depends_on:
+      - naming-server
       - zookeeper
 
 # NOT WORKED.. MULTIPLE BROKER SETUP WILL BE RESEARCHED...
@@ -84,6 +95,7 @@ services:
       KAFKA_BROKER_HOSTNAME: kafka1
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
+      - naming-server
       - mysql
       - mongo
       - solr
@@ -111,6 +123,7 @@ services:
       KAFKA_BROKER_HOSTNAME: kafka1
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
+      - naming-server
       - mysql
       - mongo
       - solr
