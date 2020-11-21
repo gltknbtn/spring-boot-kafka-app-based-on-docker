@@ -20,6 +20,7 @@ services:
     image: 'bitnami/zookeeper:latest'
     ports:
       - '2181:2181'
+    restart: always
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     networks:
@@ -30,6 +31,7 @@ services:
     ports:
       - '9092:9092'
       - '9093:9093'
+    restart: always
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -81,7 +83,7 @@ services:
 #      - kafka2
 
 
-  kafka-consumer-springbootapp:
+  springboot-kafka-consumer:
     #build:
       #context: .
       #dockerfile: Dockerfile
@@ -90,6 +92,7 @@ services:
       - "8081:8081"
     restart: always
     environment:
+      MYSQL_HOSTNAME: mysql
       SOLR_HOSTNAME: solr
       MONGO_HOSTNAME: mongo
       KAFKA_BROKER_HOSTNAME: kafka1
@@ -105,7 +108,7 @@ services:
     networks:
       - gltknbtn-kafka-web-application-network
 
-  kafka-producer-springbootapp:
+  springboot-kafka-producer:
     #    build:
     #      context: .
     #      dockerfile: Dockerfile
@@ -127,7 +130,7 @@ services:
       - mysql
       - mongo
       - solr
-      - kafka-consumer-springbootapp
+      - springboot-kafka-consumer
     networks:
       - gltknbtn-kafka-web-application-network
 

@@ -1,4 +1,4 @@
-SOLR_HOSTNAME: ${SOLR_HOSTNAME:localhost}
+SOLR_HOST: ${SOLR_HOSTNAME:localhost}
 spring:
   profiles:
     active: local
@@ -8,9 +8,19 @@ server:
   port: 8081
 eureka:
   client:
+    fetch-registry: true
     service-url:
       #defaultZone: http://localhost:8761/eureka
       defaultZone: http://naming-server:8761/eureka/
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 50000
+        readTimeout: 50000
+ribbon:
+  ConnectTimeout: 60000
+  ReadTimeout: 60000
 ---
 spring:
   profiles: local
