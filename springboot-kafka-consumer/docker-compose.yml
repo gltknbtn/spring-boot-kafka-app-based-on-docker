@@ -11,6 +11,8 @@ services:
     ports:
       - "8761:8761"
     restart: always
+    depends_on:
+      - zookeeper
     networks:
       - gltknbtn-kafka-web-application-network
 
@@ -20,8 +22,6 @@ services:
       - '2181:2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-    depends_on:
-      - naming-server
     networks:
       - gltknbtn-kafka-web-application-network
 
@@ -40,8 +40,8 @@ services:
     networks:
       - gltknbtn-kafka-web-application-network
     depends_on:
-      - naming-server
       - zookeeper
+      - naming-server
 
 # NOT WORKED.. MULTIPLE BROKER SETUP WILL BE RESEARCHED...
 #  kafka2:
@@ -96,11 +96,10 @@ services:
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
       - naming-server
+      - kafka1
       - mysql
       - mongo
       - solr
-      - zookeeper
-      - kafka1
 #      - kafka2
 #      - kafka3
     networks:
@@ -124,11 +123,10 @@ services:
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
       - naming-server
+      - kafka1
       - mysql
       - mongo
       - solr
-      - zookeeper
-      - kafka1
       - kafka-consumer-springbootapp
     networks:
       - gltknbtn-kafka-web-application-network
