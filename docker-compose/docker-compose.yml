@@ -6,6 +6,43 @@ version: '3.7'
 # I updated to this:
 # {"auths":{},"credsStore":"","stackOrchestrator":"swarm"}
 services:
+  rabbitmq:
+    image: rabbitmq:3.7-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  zipkin-server:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    environment:
+      STORAGE_TYPE: mem
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "9411:9411"
+    restart: always
+    depends_on:
+      - rabbitmq
+    networks:
+      - gltknbtn-kafka-web-application-network
+
+  zuul-api-gateway:
+    image: gltknbtn/netflix-zuul-api-gateway-server:1.0.0-SNAPSHOT
+    environment:
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    ports:
+      - "8765:8765"
+    restart: always
+    depends_on:
+      - naming-server
+      - rabbitmq
+      - zipkin-server
+    networks:
+      - gltknbtn-kafka-web-application-network
+
   naming-server:
     image: gltknbtn/netflix-eureka-naming-server:1.1.0-SNAPSHOT
     ports:
@@ -42,8 +79,10 @@ services:
     networks:
       - gltknbtn-kafka-web-application-network
     depends_on:
-      - zookeeper
       - naming-server
+      - zookeeper
+      - rabbitmq
+      - zipkin-server
 
 # NOT WORKED.. MULTIPLE BROKER SETUP WILL BE RESEARCHED...
 #  kafka2:
@@ -99,6 +138,8 @@ services:
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
       - naming-server
+      - rabbitmq
+      - zipkin-server
       - kafka1
       - mysql
       - mongo
@@ -126,6 +167,8 @@ services:
       KAFKA_BROKER_PORT: 9092
     depends_on: # Start the depends_on first
       - naming-server
+      - rabbitmq
+      - zipkin-server
       - kafka1
       - mysql
       - mongo
@@ -150,6 +193,8 @@ services:
       MYSQL_PASSWORD: 3113327
     depends_on: # Start the depends_on first
       - naming-server
+      - rabbitmq
+      - zipkin-server
       - mysql
       - mongo
       - solr

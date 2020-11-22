@@ -4,9 +4,6 @@ spring:
     active: local
   application:
     name: crm-worker-service
-  sleuth:
-    sampler:
-      probability: 1.0
 server:
   port: 8081
 eureka:
@@ -27,6 +24,11 @@ ribbon:
 ---
 spring:
   profiles: local
+  rabbitmq:
+    host: rabbitmq
+  sleuth:
+    sampler:
+      probability: 1.0
   data:
     mongodb:
       database: gltknbtn

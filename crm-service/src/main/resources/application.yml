@@ -3,9 +3,6 @@ spring:
     name: crm-service
   profiles:
     active: local
-  sleuth:
-    sampler:
-      probability: 1.0
 eureka:
   client:
     fetch-registry: true
@@ -24,6 +21,11 @@ ribbon:
 ---
 spring:
   profiles: local
+  rabbitmq:
+    host: rabbitmq
+  sleuth:
+    sampler:
+      probability: 1.0
   kafka:
     template:
       default-topic: log-inout-events
