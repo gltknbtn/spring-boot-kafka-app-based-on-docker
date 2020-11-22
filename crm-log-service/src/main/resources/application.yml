@@ -1,0 +1,99 @@
+SOLR_HOST: ${SOLR_HOSTNAME:localhost}
+spring:
+  profiles:
+    active: local
+server:
+  port: 8082
+eureka:
+  client:
+    fetch-registry: true
+    service-url:
+      #defaultZone: http://localhost:8761/eureka
+      defaultZone: http://naming-server:8761/eureka/
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 50000
+        readTimeout: 50000
+ribbon:
+  ConnectTimeout: 60000
+  ReadTimeout: 60000
+---
+spring:
+  profiles: local
+  rabbitmq:
+    host: rabbitmq
+  application:
+    name: crm-log-service
+  sleuth:
+    sampler:
+      probability: 1.0
+  data:
+    mongodb:
+      database: gltknbtn
+      uri: mongodb://${MONGO_HOSTNAME:localhost}
+  kafka:
+    template:
+      default-topic: log-inout-events
+    consumer:
+      bootstrap-servers: ${KAFKA_BROKER_HOSTNAME:localhost}:${KAFKA_BROKER_PORT:9092}
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+    producer:
+      bootstrap-servers:
+        - ${KAFKA_BROKER_HOSTNAME:localhost}:${KAFKA_BROKER_PORT:9092}
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+---
+spring:
+  profiles: nonprod
+  kafka:
+    template:
+      default-topic: log-inout-events
+    consumer:
+      bootstrap-servers: localhost:9095,localhost:9096,localhost:9097
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+      ssl:
+        trust-store-location: file:/D:/MyMind/personel/Improvments/Sample Apps/Apache Kafka/dev/ssl/client.truststore.jks
+        trust-store-password: 3113327
+        key-store-location: file:/D:/MyMind/personel/Improvments/Sample Apps/Apache Kafka/dev/ssl/client.keystore.jks
+        key-store-password: 3113327
+    producer:
+      bootstrap-servers:
+        - localhost:9091,localhost:9096,localhost:9097
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    properties:
+      security:
+        protocol: SSL
+      ssl.endpoint.identification.algorithm:
+---
+spring:
+  profiles: prod
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092,localhost:9093,localhost:9094
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: log-inout-events-listener-group
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+        transaction:
+          interceptor: TRACE
+

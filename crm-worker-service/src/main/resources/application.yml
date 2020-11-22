@@ -1,0 +1,59 @@
+SOLR_HOST: ${SOLR_HOSTNAME:localhost}
+spring:
+  profiles:
+    active: local
+  application:
+    name: crm-worker-service
+server:
+  port: 8081
+eureka:
+  client:
+    fetch-registry: true
+    service-url:
+      #defaultZone: http://localhost:8761/eureka
+      defaultZone: http://naming-server:8761/eureka/
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 50000
+        readTimeout: 50000
+ribbon:
+  ConnectTimeout: 60000
+  ReadTimeout: 60000
+---
+spring:
+  profiles: local
+  rabbitmq:
+    host: rabbitmq
+  sleuth:
+    sampler:
+      probability: 1.0
+  data:
+    mongodb:
+      database: gltknbtn
+      uri: mongodb://${MONGO_HOSTNAME:localhost}
+---
+spring:
+  profiles: nonprod
+---
+spring:
+  profiles: prod
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+        transaction:
+          interceptor: TRACE
+
