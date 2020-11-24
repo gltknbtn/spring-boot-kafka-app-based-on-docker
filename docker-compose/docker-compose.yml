@@ -140,11 +140,12 @@ services:
       - naming-server
       - rabbitmq
       - zipkin-server
-      - kafka1
       - mysql
       - mongo
       - solr
-#      - kafka2
+      - zookeeper
+      - kafka1
+    #      - kafka2
 #      - kafka3
     networks:
       - gltknbtn-kafka-web-application-network
@@ -169,11 +170,11 @@ services:
       - naming-server
       - rabbitmq
       - zipkin-server
-      - kafka1
       - mysql
       - mongo
       - solr
-      - crm-log-service
+      - zookeeper
+      - kafka1
     networks:
       - gltknbtn-kafka-web-application-network
 
@@ -198,7 +199,6 @@ services:
       - mysql
       - mongo
       - solr
-      - crm-log-service
     networks:
       - gltknbtn-kafka-web-application-network
 
